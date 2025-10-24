@@ -4,6 +4,7 @@ import mysql.connector
 from PIL import Image, ImageTk
 import os
 from dotenv import load_dotenv
+import hashlib
 
 load_dotenv()
 
@@ -17,6 +18,12 @@ try:
     cursor = db.cursor()
 except mysql.connector.Error as err:
     messagebox.showerror("Database Error", f"Error connecting to database: {err}")
+    exit()
+
+db = get_db_connection()
+if db:
+    cursor = db.cursor()
+else:
     exit()
 
 # Function to check if tables exist and create them if they do not
@@ -111,9 +118,10 @@ def verify_voter():
         open_head_boy_window()
 
 def open_admin_panel():
-    admin_password = os.getenv('ADMIN_PASSWORD', 'admin')  # Default fallback
+    admin_password = os.getenv('ADMIN_PASSWORD', 'admin')
     password = simpledialog.askstring("Admin Panel", "Enter admin password:", show="*")
-    if password != admin_password:
+    
+    if hashlib.sha256(password.encode()).hexdigest() != hashlib.sha256(admin_password.encode()).hexdigest():
         messagebox.showerror("Access Denied", "Incorrect password.")
         return
         
