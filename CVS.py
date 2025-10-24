@@ -2,10 +2,18 @@ import tkinter as tk
 from tkinter import messagebox, ttk, simpledialog
 import mysql.connector
 from PIL import Image, ImageTk
+import os
+from dotenv import load_dotenv
 
-#Connecting to mysql 
+load_dotenv()
+
 try:
-    db = mysql.connector.connect(host="DB_HOST",user="DB_USER",password="DB_PASSWORD",database="DB_NAME")
+    db = mysql.connector.connect(
+        host=os.getenv('DB_HOST', 'localhost'),
+        user=os.getenv('DB_USER', 'root'),
+        password=os.getenv('DB_PASSWORD'),
+        database=os.getenv('DB_NAME', 'votingsystem')
+    )
     cursor = db.cursor()
 except mysql.connector.Error as err:
     messagebox.showerror("Database Error", f"Error connecting to database: {err}")
@@ -103,11 +111,12 @@ def verify_voter():
         open_head_boy_window()
 
 def open_admin_panel():
-    password = simpledialog.askstring("Admin Panel", "Enter admin password:", show="*")  # Setup Password
-    if password != "admin":
+    admin_password = os.getenv('ADMIN_PASSWORD', 'admin')  # Default fallback
+    password = simpledialog.askstring("Admin Panel", "Enter admin password:", show="*")
+    if password != admin_password:
         messagebox.showerror("Access Denied", "Incorrect password.")
         return
-
+        
     # Create Admin Panel window
     admin_panel = tk.Toplevel(root)
     admin_panel.title("Admin Panel")
